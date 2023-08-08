@@ -24,6 +24,7 @@ class _DetailScreenState extends State<DetailScreen> {
   late Future<List<WebtoonEpisodeModel>> webtoonEpisodes;
   late SharedPreferences prefs;
   List<String> favorList = [];
+  bool isFavor = false;
 
   @override
   void initState() {
@@ -36,7 +37,25 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void getFavorList() async {
     prefs = await SharedPreferences.getInstance();
-    if (favorList.contains(widget.id)) {}
+    if (prefs.getStringList('favorList') != null) {
+      favorList = prefs.getStringList('favorList')!;
+      if (prefs.getStringList('favorList')!.contains(widget.id)) {
+        isFavor = true;
+        setState(() {});
+      }
+    }
+  }
+
+  void setFavorList() async {
+    if (isFavor) {
+      favorList.remove(widget.id);
+      await prefs.setStringList('favorList', favorList);
+    } else {
+      favorList.add(widget.id);
+      await prefs.setStringList('favorList', favorList);
+    }
+    isFavor = !isFavor;
+    setState(() {});
   }
 
   @override
@@ -56,10 +75,14 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.favorite_outline,
-            ),
+            onPressed: setFavorList,
+            icon: isFavor
+                ? const Icon(
+                    Icons.favorite,
+                  )
+                : const Icon(
+                    Icons.favorite_outline,
+                  ),
           ),
         ],
       ),
